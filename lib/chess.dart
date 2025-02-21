@@ -811,29 +811,645 @@
 
 
 
+// import 'package:flutter/material.dart';
+// import 'dart:math' as math;
+
+// void main() {
+//   runApp(const MyApp());
+// }
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Futuristic Chess',
+//       theme: ThemeData.dark().copyWith(
+//         primaryColor: Colors.deepPurple,
+//         scaffoldBackgroundColor: Colors.black,
+//       ),
+//       home: const ChessHomePage(),
+//       debugShowCheckedModeBanner: false,
+//     );
+//   }
+// }
+
+// class ChessHomePage extends StatefulWidget {
+//   const ChessHomePage({super.key});
+
+//   @override
+//   _ChessHomePageState createState() => _ChessHomePageState();
+// }
+
+// class Move {
+//   final int startX;
+//   final int startY;
+//   final int endX;
+//   final int endY;
+
+//   Move(this.startX, this.startY, this.endX, this.endY);
+// }
+
+// class GameState {
+//   String currentPlayer;
+//   bool check;
+//   bool gameOver;
+
+//   GameState() 
+//     : currentPlayer = 'w',
+//       check = false,
+//       gameOver = false;
+// }
+
+// class ChessBoard {
+//   List<List<String?>> board;
+//   GameState gameState;
+//   Map<String, int> pieceValues = {
+//     'p': 1, 'P': 1,
+//     'n': 3, 'N': 3,
+//     'b': 3, 'B': 3,
+//     'r': 5, 'R': 5,
+//     'q': 9, 'Q': 9,
+//     'k': 0, 'K': 0,
+//   };
+
+//   ChessBoard()
+//     : board = List.generate(8, (i) => List.generate(8, (j) => null)),
+//       gameState = GameState();
+
+//   void initializeBoard() {
+//     board[0] = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'];
+//     board[1] = List.generate(8, (index) => 'p');
+    
+//     for (int i = 2; i <= 5; i++) {
+//       board[i] = List.generate(8, (index) => null);
+//     }
+
+//     board[6] = List.generate(8, (index) => 'P');
+//     board[7] = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'];
+//   }
+
+//   List<List<String?>> cloneBoard() {
+//     return List.generate(8, (i) => 
+//       List.generate(8, (j) => board[i][j])
+//     );
+//   }
+
+//   void switchPlayer() {
+//     gameState.currentPlayer = (gameState.currentPlayer == 'w') ? 'b' : 'w';
+//   }
+
+//   bool isPieceOwnedByCurrentPlayer(String piece) {
+//     return (gameState.currentPlayer == 'w' && piece.toUpperCase() == piece) ||
+//            (gameState.currentPlayer == 'b' && piece.toLowerCase() == piece);
+//   }
+
+//   void makeMove(int startX, int startY, int endX, int endY) {
+//     String? piece = board[startX][startY];
+    
+//     if (piece?.toLowerCase() == 'k' && (startY - endY).abs() == 2) {
+//       performCastling(endY > startY);
+//     } else {
+//       board[endX][endY] = piece;
+//       board[startX][startY] = null;
+
+//       if (piece?.toLowerCase() == 'p' && (endX == 0 || endX == 7)) {
+//         board[endX][endY] = gameState.currentPlayer == 'w' ? 'Q' : 'q';
+//       }
+//     }
+
+//     switchPlayer();
+//     gameState.check = isKingInCheck(gameState.currentPlayer);
+//   }
+
+//   void undoMove(int startX, int startY, int endX, int endY, String? capturedPiece) {
+//     String? movedPiece = board[endX][endY];
+//     board[startX][startY] = movedPiece;
+//     board[endX][endY] = capturedPiece;
+//     switchPlayer();
+//   }
+
+//   List<Move> generateLegalMoves(String color) {
+//     List<Move> moves = [];
+//     for (int startX = 0; startX < 8; startX++) {
+//       for (int startY = 0; startY < 8; startY++) {
+//         if (board[startX][startY] != null && 
+//             ((color == 'w' && board[startX][startY]!.toUpperCase() == board[startX][startY]) ||
+//              (color == 'b' && board[startX][startY]!.toLowerCase() == board[startX][startY]))) {
+//           for (int endX = 0; endX < 8; endX++) {
+//             for (int endY = 0; endY < 8; endY++) {
+//               if (isValidMove(startX, startY, endX, endY)) {
+//                 String? capturedPiece = board[endX][endY];
+//                 makeMove(startX, startY, endX, endY);
+//                 if (!isKingInCheck(color)) {
+//                   moves.add(Move(startX, startY, endX, endY));
+//                 }
+//                 undoMove(startX, startY, endX, endY, capturedPiece);
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+//     return moves;
+//   }
+
+//   bool isValidMove(int startX, int startY, int endX, int endY) {
+//     if (startX < 0 || startX > 7 || startY < 0 || startY > 7 ||
+//         endX < 0 || endX > 7 || endY < 0 || endY > 7) {
+//       return false;
+//     }
+
+//     String? piece = board[startX][startY];
+//     if (piece == null) return false;
+
+//     if (!isPieceOwnedByCurrentPlayer(piece)) return false;
+
+//     String? targetPiece = board[endX][endY];
+//     if (targetPiece != null && isPieceOwnedByCurrentPlayer(targetPiece)) {
+//       return false;
+//     }
+
+//     if (piece.toLowerCase() == 'k' && (startY - endY).abs() == 2) {
+//       return canCastle(endY > startY);
+//     }
+
+//     switch (piece.toLowerCase()) {
+//       case 'p':
+//         return _isValidPawnMove(piece, startX, startY, endX, endY);
+//       case 'r':
+//         return _isValidRookMove(startX, startY, endX, endY);
+//       case 'n':
+//         return _isValidKnightMove(startX, startY, endX, endY);
+//       case 'b':
+//         return _isValidBishopMove(startX, startY, endX, endY);
+//       case 'q':
+//         return _isValidQueenMove(startX, startY, endX, endY);
+//       case 'k':
+//         return _isValidKingMove(startX, startY, endX, endY);
+//       default:
+//         return false;
+//     }
+//   }
+
+//   bool _isValidPawnMove(String piece, int startX, int startY, int endX, int endY) {
+//     int direction = piece == 'P' ? -1 : 1;
+//     int startRow = piece == 'P' ? 6 : 1;
+
+//     if (startY == endY && board[endX][endY] == null) {
+//       if (endX == startX + direction) {
+//         return true;
+//       }
+//       if (startX == startRow && 
+//           endX == startX + 2 * direction && 
+//           board[startX + direction][endY] == null) {
+//         return true;
+//       }
+//     }
+
+//     if ((endY == startY + 1 || endY == startY - 1) && 
+//         endX == startX + direction && 
+//         board[endX][endY] != null) {
+//       return true;
+//     }
+
+//     return false;
+//   }
+
+//   bool _isValidRookMove(int startX, int startY, int endX, int endY) {
+//     if (startX != endX && startY != endY) return false;
+
+//     if (startX == endX) {
+//       int minY = math.min(startY, endY);
+//       int maxY = math.max(startY, endY);
+//       for (int y = minY + 1; y < maxY; y++) {
+//         if (board[startX][y] != null) return false;
+//       }
+//     }
+
+//     if (startY == endY) {
+//       int minX = math.min(startX, endX);
+//       int maxX = math.max(startX, endX);
+//       for (int x = minX + 1; x < maxX; x++) {
+//         if (board[x][startY] != null) return false;
+//       }
+//     }
+
+//     return true;
+//   }
+
+//   bool _isValidKnightMove(int startX, int startY, int endX, int endY) {
+//     int dx = (startX - endX).abs();
+//     int dy = (startY - endY).abs();
+//     return (dx == 2 && dy == 1) || (dx == 1 && dy == 2);
+//   }
+
+//   bool _isValidBishopMove(int startX, int startY, int endX, int endY) {
+//     if ((startX - endX).abs() != (startY - endY).abs()) return false;
+
+//     int dx = startX < endX ? 1 : -1;
+//     int dy = startY < endY ? 1 : -1;
+//     int steps = (startX - endX).abs();
+
+//     for (int i = 1; i < steps; i++) {
+//       if (board[startX + i * dx][startY + i * dy] != null) return false;
+//     }
+
+//     return true;
+//   }
+
+//   bool _isValidQueenMove(int startX, int startY, int endX, int endY) {
+//     return _isValidRookMove(startX, startY, endX, endY) || 
+//            _isValidBishopMove(startX, startY, endX, endY);
+//   }
+
+//   bool _isValidKingMove(int startX, int startY, int endX, int endY) {
+//     return (startX - endX).abs() <= 1 && (startY - endY).abs() <= 1;
+//   }
+
+//   bool isKingInCheck(String color) {
+//     int kingX = -1, kingY = -1;
+//     String kingPiece = color == 'w' ? 'K' : 'k';
+
+//     for (int x = 0; x < 8; x++) {
+//       for (int y = 0; y < 8; y++) {
+//         if (board[x][y] == kingPiece) {
+//           kingX = x;
+//           kingY = y;
+//           break;
+//         }
+//       }
+//       if (kingX != -1) break;
+//     }
+
+//     for (int x = 0; x < 8; x++) {
+//       for (int y = 0; y < 8; y++) {
+//         if (board[x][y] != null && 
+//             isPieceOwnedByCurrentPlayer(board[x][y]!) != (color == 'w')) {
+//           if (isValidMove(x, y, kingX, kingY)) {
+//             return true;
+//           }
+//         }
+//       }
+//     }
+//     return false;
+//   }
+
+//   bool canCastle(bool kingSide) {
+//     String king = gameState.currentPlayer == 'w' ? 'K' : 'k';
+//     String rook = gameState.currentPlayer == 'w' ? 'R' : 'r';
+//     int row = gameState.currentPlayer == 'w' ? 7 : 0;
+//     int kingCol = 4;
+//     int rookCol = kingSide ? 7 : 0;
+
+//     if (board[row][kingCol] != king || board[row][rookCol] != rook) {
+//       return false;
+//     }
+
+//     int start = math.min(kingCol, rookCol) + 1;
+//     int end = math.max(kingCol, rookCol);
+    
+//     for (int col = start; col < end; col++) {
+//       if (board[row][col] != null) return false;
+//     }
+
+//     if (isKingInCheck(gameState.currentPlayer)) return false;
+
+//     int direction = kingSide ? 1 : -1;
+//     for (int col = kingCol; col != kingCol + 2 * direction; col += direction) {
+//       board[row][kingCol] = null;
+//       board[row][col] = king;
+//       bool inCheck = isKingInCheck(gameState.currentPlayer);
+//       board[row][col] = null;
+//       board[row][kingCol] = king;
+//       if (inCheck) return false;
+//     }
+
+//     return true;
+//   }
+
+//   void performCastling(bool kingSide) {
+//     int row = gameState.currentPlayer == 'w' ? 7 : 0;
+//     int kingCol = 4;
+//     int rookCol = kingSide ? 7 : 0;
+//     int newKingCol = kingSide ? 6 : 2;
+//     int newRookCol = kingSide ? 5 : 3;
+
+//     String king = board[row][kingCol]!;
+//     String rook = board[row][rookCol]!;
+
+//     board[row][kingCol] = null;
+//     board[row][rookCol] = null;
+//     board[row][newKingCol] = king;
+//     board[row][newRookCol] = rook;
+//   }
+
+//   int evaluatePosition() {
+//     int score = 0;
+
+//     for (int x = 0; x < 8; x++) {
+//       for (int y = 0; y < 8; y++) {
+//         if (board[x][y] != null) {
+//           int pieceValue = pieceValues[board[x][y]]!;
+//           if (board[x][y]!.toUpperCase() == board[x][y]) {
+//             score += pieceValue;
+//           } else {
+//             score -= pieceValue;
+//           }
+//         }
+//       }
+//     }
+
+//     if (isKingInCheck('w')) score -= 2;
+//     if (isKingInCheck('b')) score += 2;
+
+//     return score;
+//   }
+
+//   int minimax(int depth, bool maximizingPlayer, int alpha, int beta) {
+//     if (depth == 0) {
+//       return evaluatePosition();
+//     }
+
+//     List<Move> moves = generateLegalMoves(maximizingPlayer ? 'w' : 'b');
+    
+//     if (moves.isEmpty) {
+//       if (isKingInCheck(maximizingPlayer ? 'w' : 'b')) {
+//         return maximizingPlayer ? -10000 : 10000;
+//       }
+//       return 0;
+//     }
+
+//     if (maximizingPlayer) {
+//       int maxEval = -999999;
+//       for (Move move in moves) {
+//         String? capturedPiece = board[move.endX][move.endY];
+//         makeMove(move.startX, move.startY, move.endX, move.endY);
+//         int eval = minimax(depth - 1, false, alpha, beta);
+//         undoMove(move.startX, move.startY, move.endX, move.endY, capturedPiece);
+//         maxEval = math.max(maxEval, eval);
+//         alpha = math.max(alpha, eval);
+//         if (beta <= alpha) break;
+//       }
+//       return maxEval;
+//     } else {
+//       int minEval = 999999;
+//       for (Move move in moves) {
+//         String? capturedPiece = board[move.endX][move.endY];
+//         makeMove(move.startX, move.startY, move.endX, move.endY);
+//         int eval = minimax(depth - 1, true, alpha, beta);
+//         undoMove(move.startX, move.startY, move.endX, move.endY, capturedPiece);
+//         minEval = math.min(minEval, eval);
+//         beta = math.min(beta, eval);
+//         if (beta <= alpha) break;
+//       }
+//       return minEval;
+//     }
+//   }
+
+//   Move findBestMove(int depth) {
+//     List<Move> legalMoves = generateLegalMoves('b');
+//     Move bestMove = legalMoves[0];
+//     int bestValue = 999999;
+
+//     for (Move move in legalMoves) {
+//       String? capturedPiece = board[move.endX][move.endY];
+//       makeMove(move.startX, move.startY, move.endX, move.endY);
+//       int moveValue = minimax(depth - 1, true, -999999, 999999);
+//       undoMove(move.startX, move.startY, move.endX, move.endY, capturedPiece);
+
+//       if (moveValue < bestValue) {
+//         bestValue = moveValue;
+//         bestMove = move;
+//       }
+//     }
+
+//     return bestMove;
+//   }
+
+//   String getPieceSymbol(String piece) {
+//     switch (piece.toLowerCase()) {
+//       case 'p':
+//         return '♟';
+//       case 'r':
+//         return '♜';
+//       case 'n':
+//         return '♞';
+//       case 'b':
+//         return '♝';
+//       case 'q':
+//         return '♛';
+//       case 'k':
+//         return '♚';
+//       default:
+//         return '';
+//     }
+//   }
+// }
+
+// class _ChessHomePageState extends State<ChessHomePage> {
+//   final ChessBoard _chessBoard = ChessBoard();
+//   List<int> _selectedSquare = [-1, -1];
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _chessBoard.initializeBoard();
+//   }
+
+//   void _onSquareTapped(int x, int y) {
+//   // Only allow moves if it's White's turn (player's turn)
+//   if (_chessBoard.gameState.currentPlayer != 'w') return;  // Add this line
+  
+//   setState(() {
+//     if (_selectedSquare[0] == -1) {
+//       if (_chessBoard.board[x][y] != null && 
+//           _chessBoard.isPieceOwnedByCurrentPlayer(_chessBoard.board[x][y]!)) {
+//         _selectedSquare = [x, y];
+//       }
+//     } else {
+//       if (_chessBoard.isValidMove(_selectedSquare[0], _selectedSquare[1], x, y)) {
+//         _chessBoard.makeMove(_selectedSquare[0], _selectedSquare[1], x, y);
+//         _selectedSquare = [-1, -1];
+        
+//         if (!_chessBoard.gameState.gameOver && 
+//             _chessBoard.gameState.currentPlayer == 'b') {
+//           Future.delayed(const Duration(milliseconds: 500), () {
+//             _makeAutomaticMove();
+//           });
+//         }
+//       } else {
+//         _selectedSquare = [-1, -1];
+//       }
+//     }
+//   });
+// }
+
+//   void _makeAutomaticMove() {
+//     Move bestMove = _chessBoard.findBestMove(3);
+//     setState(() {
+//       _chessBoard.makeMove(bestMove.startX, bestMove.startY, bestMove.endX, bestMove.endY);
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Futuristic Chess'),
+//         backgroundColor: Colors.deepPurple,
+//       ),
+//       body: Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: <Widget>[
+//             _buildBoard(),
+//             const SizedBox(height: 20),
+//             Text(
+//               'Current Player: ${_chessBoard.gameState.currentPlayer == 'w' ? 'White' : 'Black'}',
+//               style: const TextStyle(fontSize: 24, color: Colors.cyanAccent),
+//             ),
+//             if (_chessBoard.gameState.check)
+//               const Text(
+//                 'Check!',
+//                 style: TextStyle(fontSize: 24, color: Colors.redAccent),
+//               ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildBoard() {
+//     return Container(
+//       width: MediaQuery.of(context).size.width * 0.9,
+//       height: MediaQuery.of(context).size.width * 0.9,
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(15),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.cyanAccent.withOpacity(0.5),
+//             blurRadius: 10,
+//             spreadRadius: 5,
+//           ),
+//         ],
+//       ),
+//       child: ClipRRect(
+//         borderRadius: BorderRadius.circular(15),
+//         child: GridView.builder(
+//           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+//             crossAxisCount: 8,
+//           ),
+//           itemBuilder: _buildGridItems,
+//           itemCount: 64,
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildGridItems(BuildContext context, int index) {
+//     final int x = index ~/ 8;
+//     final int y = index % 8;
+//     final String? piece = _chessBoard.board[x][y];
+//     final bool isSelected = _selectedSquare[0] == x && _selectedSquare[1] == y;
+
+//     return GestureDetector(
+//       onTap: () {
+//         _onSquareTapped(x, y);
+//       },
+//       child: Container(
+//         decoration: BoxDecoration(
+//           color: isSelected
+//               ? Colors.deepPurple
+//               : (x + y) % 2 == 0 
+//                   ? Colors.deepPurple.withOpacity(0.7) 
+//                   : Colors.deepPurple.withOpacity(0.3),
+//           border: Border.all(
+//             color: Colors.cyanAccent.withOpacity(0.3),
+//           ),
+//         ),
+//         child: Center(
+//           child: piece != null
+//               ? _buildPiece(piece)
+//               : null,
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildPiece(String piece) {
+//     return Container(
+//       width: 40,
+//       height: 40,
+//       decoration: BoxDecoration(
+//         shape: BoxShape.circle,
+//         gradient: RadialGradient(
+//           colors: [
+//             piece.toLowerCase() == piece ? Colors.black : Colors.white,
+//             piece.toLowerCase() == piece ? Colors.grey[800]! : Colors.grey[300]!,
+//           ],
+//         ),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.cyanAccent.withOpacity(0.5),
+//             blurRadius: 5,
+//             spreadRadius: 1,
+//           ),
+//         ],
+//       ),
+//       child: Center(
+//         child: Text(
+//           _chessBoard.getPieceSymbol(piece),
+//           style: TextStyle(
+//             fontSize: 24,
+//             color: piece.toLowerCase() == piece ? Colors.white : Colors.black,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Futuristic Chess',
+      title: 'Enhanced Chess',
       theme: ThemeData.dark().copyWith(
         primaryColor: Colors.deepPurple,
         scaffoldBackgroundColor: Colors.black,
       ),
-      home: ChessHomePage(),
+      home: const ChessHomePage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class ChessHomePage extends StatefulWidget {
+  const ChessHomePage({super.key});
+
   @override
   _ChessHomePageState createState() => _ChessHomePageState();
 }
@@ -843,36 +1459,59 @@ class Move {
   final int startY;
   final int endX;
   final int endY;
+  final bool isCapture;
+  final bool isCheck;
+  final bool isCastling;
 
-  Move(this.startX, this.startY, this.endX, this.endY);
+  Move(this.startX, this.startY, this.endX, this.endY, {
+    this.isCapture = false,
+    this.isCheck = false,
+    this.isCastling = false,
+  });
 }
 
 class GameState {
   String currentPlayer;
   bool check;
   bool gameOver;
+  String? winner;
+  List<Move> moveHistory;
+  bool whiteCastled;
+  bool blackCastled;
+  Map<String, bool> pieceMoved;
 
-  GameState() 
+  GameState()
     : currentPlayer = 'w',
       check = false,
-      gameOver = false;
+      gameOver = false,
+      winner = null,
+      moveHistory = [],
+      whiteCastled = false,
+      blackCastled = false,
+      pieceMoved = {
+        'wk': false, 'wra': false, 'wrh': false,
+        'bk': false, 'bra': false, 'brh': false,
+      };
 }
 
 class ChessBoard {
   List<List<String?>> board;
   GameState gameState;
-  Map<String, int> pieceValues = {
-    'p': 1, 'P': 1,
-    'n': 3, 'N': 3,
-    'b': 3, 'B': 3,
-    'r': 5, 'R': 5,
-    'q': 9, 'Q': 9,
-    'k': 0, 'K': 0,
-  };
+  List<List<bool>> validMoveHighlights;
+  Map<String, int> pieceValues;
 
   ChessBoard()
     : board = List.generate(8, (i) => List.generate(8, (j) => null)),
-      gameState = GameState();
+      gameState = GameState(),
+      validMoveHighlights = List.generate(8, (i) => List.generate(8, (j) => false)),
+      pieceValues = {
+        'p': 1, 'P': 1,
+        'n': 3, 'N': 3,
+        'b': 3, 'B': 3,
+        'r': 5, 'R': 5,
+        'q': 9, 'Q': 9,
+        'k': 0, 'K': 0,
+      };
 
   void initializeBoard() {
     board[0] = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'];
@@ -884,6 +1523,73 @@ class ChessBoard {
 
     board[6] = List.generate(8, (index) => 'P');
     board[7] = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'];
+    
+    clearHighlights();
+  }
+
+  void clearHighlights() {
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        validMoveHighlights[i][j] = false;
+      }
+    }
+  }
+
+  void showValidMoves(int startX, int startY) {
+    clearHighlights();
+    for (int endX = 0; endX < 8; endX++) {
+      for (int endY = 0; endY < 8; endY++) {
+        if (isValidMove(startX, startY, endX, endY)) {
+          String? capturedPiece = board[endX][endY];
+          makeMove(startX, startY, endX, endY);
+          if (!isKingInCheck(gameState.currentPlayer)) {
+            validMoveHighlights[endX][endY] = true;
+          }
+          undoMove(startX, startY, endX, endY, capturedPiece);
+        }
+      }
+    }
+  }
+
+  bool isGameOver() {
+    List<Move> availableMoves = generateLegalMoves(gameState.currentPlayer);
+    if (availableMoves.isEmpty) {
+      gameState.gameOver = true;
+      if (isKingInCheck(gameState.currentPlayer)) {
+        gameState.winner = gameState.currentPlayer == 'w' ? 'Black' : 'White';
+        return true;
+      } else {
+        gameState.winner = 'Draw - Stalemate';
+        return true;
+      }
+    }
+    
+    bool insufficientMaterial = checkInsufficientMaterial();
+    if (insufficientMaterial) {
+      gameState.gameOver = true;
+      gameState.winner = 'Draw - Insufficient Material';
+      return true;
+    }
+
+    return false;
+  }
+
+  bool checkInsufficientMaterial() {
+    Map<String, int> pieces = {};
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (board[i][j] != null) {
+          String piece = board[i][j]!.toLowerCase();
+          pieces[piece] = (pieces[piece] ?? 0) + 1;
+        }
+      }
+    }
+
+    if (pieces.length == 2 && pieces['k'] == 2) return true;
+    if (pieces.length == 3 && pieces['k'] == 2 &&
+        (pieces['n'] == 1 || pieces['b'] == 1)) return true;
+    
+    return false;
   }
 
   List<List<String?>> cloneBoard() {
@@ -903,10 +1609,13 @@ class ChessBoard {
 
   void makeMove(int startX, int startY, int endX, int endY) {
     String? piece = board[startX][startY];
+    String? capturedPiece = board[endX][endY];
+    bool isCapture = capturedPiece != null;
     
     if (piece?.toLowerCase() == 'k' && (startY - endY).abs() == 2) {
       performCastling(endY > startY);
     } else {
+      updatePieceMoved(startX, startY);
       board[endX][endY] = piece;
       board[startX][startY] = null;
 
@@ -916,7 +1625,25 @@ class ChessBoard {
     }
 
     switchPlayer();
-    gameState.check = isKingInCheck(gameState.currentPlayer);
+    bool isCheck = isKingInCheck(gameState.currentPlayer);
+    gameState.check = isCheck;
+    
+    Move move = Move(startX, startY, endX, endY,
+      isCapture: isCapture,
+      isCheck: isCheck,
+      isCastling: piece?.toLowerCase() == 'k' && (startY - endY).abs() == 2
+    );
+    gameState.moveHistory.add(move);
+  }
+
+  void updatePieceMoved(int startX, int startY) {
+    String? piece = board[startX][startY];
+    if (piece == 'K') gameState.pieceMoved['wk'] = true;
+    else if (piece == 'k') gameState.pieceMoved['bk'] = true;
+    else if (piece == 'R' && startY == 0) gameState.pieceMoved['wra'] = true;
+    else if (piece == 'R' && startY == 7) gameState.pieceMoved['wrh'] = true;
+    else if (piece == 'r' && startY == 0) gameState.pieceMoved['bra'] = true;
+    else if (piece == 'r' && startY == 7) gameState.pieceMoved['brh'] = true;
   }
 
   void undoMove(int startX, int startY, int endX, int endY, String? capturedPiece) {
@@ -939,7 +1666,9 @@ class ChessBoard {
                 String? capturedPiece = board[endX][endY];
                 makeMove(startX, startY, endX, endY);
                 if (!isKingInCheck(color)) {
-                  moves.add(Move(startX, startY, endX, endY));
+                  moves.add(Move(startX, startY, endX, endY,
+                    isCapture: capturedPiece != null
+                  ));
                 }
                 undoMove(startX, startY, endX, endY, capturedPiece);
               }
@@ -1060,7 +1789,7 @@ class ChessBoard {
            _isValidBishopMove(startX, startY, endX, endY);
   }
 
-  bool _isValidKingMove(int startX, int startY, int endX, int endY) {
+ bool _isValidKingMove(int startX, int startY, int endX, int endY) {
     return (startX - endX).abs() <= 1 && (startY - endY).abs() <= 1;
   }
 
@@ -1079,10 +1808,10 @@ class ChessBoard {
       if (kingX != -1) break;
     }
 
+    String oppositeColor = color == 'w' ? 'b' : 'w';
     for (int x = 0; x < 8; x++) {
       for (int y = 0; y < 8; y++) {
-        if (board[x][y] != null && 
-            isPieceOwnedByCurrentPlayer(board[x][y]!) != (color == 'w')) {
+        if (board[x][y] != null && isPieceOwnedByCurrentPlayer(board[x][y]!) != (color == 'w')) {
           if (isValidMove(x, y, kingX, kingY)) {
             return true;
           }
@@ -1093,11 +1822,22 @@ class ChessBoard {
   }
 
   bool canCastle(bool kingSide) {
+    if (gameState.currentPlayer == 'w' && gameState.pieceMoved['wk']!) return false;
+    if (gameState.currentPlayer == 'b' && gameState.pieceMoved['bk']!) return false;
+
     String king = gameState.currentPlayer == 'w' ? 'K' : 'k';
     String rook = gameState.currentPlayer == 'w' ? 'R' : 'r';
     int row = gameState.currentPlayer == 'w' ? 7 : 0;
     int kingCol = 4;
     int rookCol = kingSide ? 7 : 0;
+
+    if (kingSide) {
+      if (gameState.currentPlayer == 'w' && gameState.pieceMoved['wrh']!) return false;
+      if (gameState.currentPlayer == 'b' && gameState.pieceMoved['brh']!) return false;
+    } else {
+      if (gameState.currentPlayer == 'w' && gameState.pieceMoved['wra']!) return false;
+      if (gameState.currentPlayer == 'b' && gameState.pieceMoved['bra']!) return false;
+    }
 
     if (board[row][kingCol] != king || board[row][rookCol] != rook) {
       return false;
@@ -1139,6 +1879,12 @@ class ChessBoard {
     board[row][rookCol] = null;
     board[row][newKingCol] = king;
     board[row][newRookCol] = rook;
+
+    if (gameState.currentPlayer == 'w') {
+      gameState.whiteCastled = true;
+    } else {
+      gameState.blackCastled = true;
+    }
   }
 
   int evaluatePosition() {
@@ -1150,8 +1896,10 @@ class ChessBoard {
           int pieceValue = pieceValues[board[x][y]]!;
           if (board[x][y]!.toUpperCase() == board[x][y]) {
             score += pieceValue;
+            score += evaluatePositionalAdvantage(x, y, board[x][y]!, true);
           } else {
             score -= pieceValue;
+            score -= evaluatePositionalAdvantage(x, y, board[x][y]!, false);
           }
         }
       }
@@ -1160,7 +1908,67 @@ class ChessBoard {
     if (isKingInCheck('w')) score -= 2;
     if (isKingInCheck('b')) score += 2;
 
+    if (gameState.whiteCastled) score += 1;
+    if (gameState.blackCastled) score -= 1;
+
     return score;
+  }
+
+  int evaluatePositionalAdvantage(int x, int y, String piece, bool isWhite) {
+    int score = 0;
+    int rank = isWhite ? x : 7 - x;
+
+    switch (piece.toLowerCase()) {
+      case 'p':
+        score += rank ~/ 2;  // Pawns more valuable as they advance
+        if (y > 2 && y < 5) score += 1;  // Center control
+        break;
+      case 'n':
+        if (x > 2 && x < 5 && y > 2 && y < 5) score += 2;  // Knights strong in center
+        break;
+      case 'b':
+        if (x > 2 && x < 5 && y > 2 && y < 5) score += 1;  // Bishops better in center
+        break;
+      case 'r':
+        if (y == 3 || y == 4) score += 1;  // Rooks on open files
+        break;
+      case 'q':
+        if (x > 2 && x < 5 && y > 2 && y < 5) score += 1;  // Queen mobility
+        break;
+      case 'k':
+        if (rank < 2) score += 2;  // King safety
+        break;
+    }
+    return score;
+  }
+
+  Move findBestMove(int depth) {
+    List<Move> legalMoves = generateLegalMoves(gameState.currentPlayer);
+    if (legalMoves.isEmpty) return Move(0, 0, 0, 0);
+    
+    Move bestMove = legalMoves[0];
+    int bestValue = gameState.currentPlayer == 'w' ? -999999 : 999999;
+
+    for (Move move in legalMoves) {
+      String? capturedPiece = board[move.endX][move.endY];
+      makeMove(move.startX, move.startY, move.endX, move.endY);
+      
+      int moveValue = minimax(depth - 1, 
+                            gameState.currentPlayer == 'w',
+                            -999999, 999999);
+                            
+      undoMove(move.startX, move.startY, move.endX, move.endY, capturedPiece);
+
+      if (gameState.currentPlayer == 'w' && moveValue > bestValue) {
+        bestValue = moveValue;
+        bestMove = move;
+      } else if (gameState.currentPlayer == 'b' && moveValue < bestValue) {
+        bestValue = moveValue;
+        bestMove = move;
+      }
+    }
+
+    return bestMove;
   }
 
   int minimax(int depth, bool maximizingPlayer, int alpha, int beta) {
@@ -1204,42 +2012,15 @@ class ChessBoard {
     }
   }
 
-  Move findBestMove(int depth) {
-    List<Move> legalMoves = generateLegalMoves('b');
-    Move bestMove = legalMoves[0];
-    int bestValue = 999999;
-
-    for (Move move in legalMoves) {
-      String? capturedPiece = board[move.endX][move.endY];
-      makeMove(move.startX, move.startY, move.endX, move.endY);
-      int moveValue = minimax(depth - 1, true, -999999, 999999);
-      undoMove(move.startX, move.startY, move.endX, move.endY, capturedPiece);
-
-      if (moveValue < bestValue) {
-        bestValue = moveValue;
-        bestMove = move;
-      }
-    }
-
-    return bestMove;
-  }
-
   String getPieceSymbol(String piece) {
     switch (piece.toLowerCase()) {
-      case 'p':
-        return '♟';
-      case 'r':
-        return '♜';
-      case 'n':
-        return '♞';
-      case 'b':
-        return '♝';
-      case 'q':
-        return '♛';
-      case 'k':
-        return '♚';
-      default:
-        return '';
+      case 'p': return '♟';
+      case 'r': return '♜';
+      case 'n': return '♞';
+      case 'b': return '♝';
+      case 'q': return '♛';
+      case 'k': return '♚';
+      default: return '';
     }
   }
 }
@@ -1255,37 +2036,47 @@ class _ChessHomePageState extends State<ChessHomePage> {
   }
 
   void _onSquareTapped(int x, int y) {
-  // Only allow moves if it's White's turn (player's turn)
-  if (_chessBoard.gameState.currentPlayer != 'w') return;  // Add this line
-  
-  setState(() {
-    if (_selectedSquare[0] == -1) {
-      if (_chessBoard.board[x][y] != null && 
-          _chessBoard.isPieceOwnedByCurrentPlayer(_chessBoard.board[x][y]!)) {
-        _selectedSquare = [x, y];
-      }
-    } else {
-      if (_chessBoard.isValidMove(_selectedSquare[0], _selectedSquare[1], x, y)) {
-        _chessBoard.makeMove(_selectedSquare[0], _selectedSquare[1], x, y);
-        _selectedSquare = [-1, -1];
-        
-        if (!_chessBoard.gameState.gameOver && 
-            _chessBoard.gameState.currentPlayer == 'b') {
-          Future.delayed(Duration(milliseconds: 500), () {
-            _makeAutomaticMove();
-          });
+    if (_chessBoard.gameState.gameOver) return;
+    
+    if (_chessBoard.gameState.currentPlayer != 'w') return;
+    
+    setState(() {
+      if (_selectedSquare[0] == -1) {
+        if (_chessBoard.board[x][y] != null && 
+            _chessBoard.isPieceOwnedByCurrentPlayer(_chessBoard.board[x][y]!)) {
+          _selectedSquare = [x, y];
+          _chessBoard.showValidMoves(x, y);
         }
       } else {
-        _selectedSquare = [-1, -1];
+        if (_chessBoard.isValidMove(_selectedSquare[0], _selectedSquare[1], x, y)) {
+          _chessBoard.makeMove(_selectedSquare[0], _selectedSquare[1], x, y);
+          _selectedSquare = [-1, -1];
+          _chessBoard.clearHighlights();
+          
+          if (_chessBoard.isGameOver()) {
+            return;
+          }
+          
+          if (_chessBoard.gameState.currentPlayer == 'b') {
+            Future.delayed(const Duration(milliseconds: 500), () {
+              _makeAutomaticMove();
+            });
+          }
+        } else {
+          _selectedSquare = [-1, -1];
+          _chessBoard.clearHighlights();
+        }
       }
-    }
-  });
-}
+    });
+  }
 
   void _makeAutomaticMove() {
+    if (_chessBoard.gameState.gameOver) return;
+    
     Move bestMove = _chessBoard.findBestMove(3);
     setState(() {
       _chessBoard.makeMove(bestMove.startX, bestMove.startY, bestMove.endX, bestMove.endY);
+      _chessBoard.isGameOver();
     });
   }
 
@@ -1293,7 +2084,7 @@ class _ChessHomePageState extends State<ChessHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Futuristic Chess'),
+        title: const Text('Enhanced Chess'),
         backgroundColor: Colors.deepPurple,
       ),
       body: Center(
@@ -1301,15 +2092,20 @@ class _ChessHomePageState extends State<ChessHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             _buildBoard(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               'Current Player: ${_chessBoard.gameState.currentPlayer == 'w' ? 'White' : 'Black'}',
-              style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+              style: const TextStyle(fontSize: 24, color: Colors.cyanAccent),
             ),
             if (_chessBoard.gameState.check)
-              Text(
+              const Text(
                 'Check!',
                 style: TextStyle(fontSize: 24, color: Colors.redAccent),
+              ),
+            if (_chessBoard.gameState.gameOver)
+              Text(
+                'Game Over - ${_chessBoard.gameState.winner}',
+                style: const TextStyle(fontSize: 24, color: Colors.greenAccent),
               ),
           ],
         ),
@@ -1334,7 +2130,7 @@ class _ChessHomePageState extends State<ChessHomePage> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
         child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 8,
           ),
           itemBuilder: _buildGridItems,
@@ -1343,36 +2139,44 @@ class _ChessHomePageState extends State<ChessHomePage> {
       ),
     );
   }
-
   Widget _buildGridItems(BuildContext context, int index) {
-    final int x = index ~/ 8;
-    final int y = index % 8;
-    final String? piece = _chessBoard.board[x][y];
-    final bool isSelected = _selectedSquare[0] == x && _selectedSquare[1] == y;
+  final int x = index ~/ 8;
+  final int y = index % 8;
+  final String? piece = _chessBoard.board[x][y];
+  final bool isSelected = _selectedSquare[0] == x && _selectedSquare[1] == y;
+  final bool isValidMove = _chessBoard.validMoveHighlights[x][y];
 
-    return GestureDetector(
-      onTap: () {
-        _onSquareTapped(x, y);
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.deepPurple
-              : (x + y) % 2 == 0 
-                  ? Colors.deepPurple.withOpacity(0.7) 
-                  : Colors.deepPurple.withOpacity(0.3),
-          border: Border.all(
-            color: Colors.cyanAccent.withOpacity(0.3),
-          ),
+  return GestureDetector(
+    onTap: () => _onSquareTapped(x, y),
+    child: Container(
+      decoration: BoxDecoration(
+        color: isSelected
+            ? Colors.deepPurple
+            : isValidMove
+                ? Colors.greenAccent.withOpacity(0.3)
+                : (x + y) % 2 == 0
+                    ? Colors.deepPurple.withOpacity(0.7)
+                    : Colors.deepPurple.withOpacity(0.3),
+        border: Border.all(
+          color: Colors.cyanAccent.withOpacity(0.3),
+          width: isValidMove ? 2 : 1,
         ),
-        child: Center(
-          child: piece != null
-              ? _buildPiece(piece)
-              : null,
-        ),
+        boxShadow: isValidMove
+            ? [
+                BoxShadow(
+                  color: Colors.greenAccent.withOpacity(0.3),
+                  blurRadius: 5,
+                  spreadRadius: 1,
+                ),
+              ]
+            : [],
       ),
-    );
-  }
+      child: Center(
+        child: piece != null ? _buildPiece(piece) : null,
+      ),
+    ),
+  );
+}
 
   Widget _buildPiece(String piece) {
     return Container(
@@ -1382,8 +2186,12 @@ class _ChessHomePageState extends State<ChessHomePage> {
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [
-            piece.toLowerCase() == piece ? Colors.black : Colors.white,
-            piece.toLowerCase() == piece ? Colors.grey[800]! : Colors.grey[300]!,
+            piece.toLowerCase() == piece 
+                ? Colors.black 
+                : Colors.white,
+            piece.toLowerCase() == piece 
+                ? Colors.grey[800]! 
+                : Colors.grey[300]!,
           ],
         ),
         boxShadow: [
@@ -1394,14 +2202,38 @@ class _ChessHomePageState extends State<ChessHomePage> {
           ),
         ],
       ),
-      child: Center(
-        child: Text(
-          _chessBoard.getPieceSymbol(piece),
-          style: TextStyle(
-            fontSize: 24,
-            color: piece.toLowerCase() == piece ? Colors.white : Colors.black,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Text(
+            _chessBoard.getPieceSymbol(piece),
+            style: TextStyle(
+              fontSize: 24,
+              color: piece.toLowerCase() == piece 
+                  ? Colors.white 
+                  : Colors.black,
+              shadows: [
+                Shadow(
+                  color: Colors.cyanAccent.withOpacity(0.5),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
           ),
-        ),
+          if (_selectedSquare[0] != -1 &&
+              _chessBoard.board[_selectedSquare[0]][_selectedSquare[1]] == piece)
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.cyanAccent.withOpacity(0.8),
+                  width: 2,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
